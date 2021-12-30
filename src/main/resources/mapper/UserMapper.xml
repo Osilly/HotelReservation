@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 命名空间-对应相应的接口 -->
+<mapper namespace="com.lyx.hrms.mapper.UserMapper">
+	
+	<!-- 配置实体类与数据库表的对应关系 -->
+	<resultMap id="userResultMap" type="user" >
+		<id property="id" column="user_id" />
+		<result property="username" column="username" />
+		<result property="password" column="userpass" />
+		<result property="email" column="email" />
+		<result property="phone" column="phone" />
+		<result property="realName" column="realname" />
+		<result property="gender" column="gender" />
+		<result property="photoPath" column="photo_path" />
+		<result property="status" column="status" />
+	</resultMap>
+	
+	<!-- 主键回显 -->
+	<insert id="save" parameterType="user" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_user(username,userpass,email,phone,realname,gender,photo_path,status)
+		values(#{username},#{password},#{email},#{phone},#{realName},#{gender},#{photoPath},#{status})
+	</insert>
+	
+	<update id="update" parameterType="user">
+		update tb_user
+		<set>
+			<if test="password!=null">userpass=#{password},</if>
+			<if test="email!=null">email=#{email},</if>
+			<if test="realName!=null">realname=#{realName},</if>
+			<if test="gender!=null">gender=#{gender},</if>
+			<if test="photoPath!=null">photo_path=#{photoPath},</if>
+		</set>
+		where user_id=#{id}
+	</update>
+	
+	<select id="findByUsername" resultMap="userResultMap" parameterType="string">
+		select user_id,username,userpass,email,phone,realname,gender,photo_path,status
+		from tb_user
+		where username=#{username}
+	</select>
+	
+	<select id="findById" resultMap="userResultMap" parameterType="int">
+		select user_id,username,userpass,email,phone,realname,gender,photo_path,status
+		from tb_user
+		where user_id=#{id}
+	</select>
+
+	<update id="modifyStatus" parameterType="user">
+		update tb_user set status = #{status}
+	</update>
+
+	<select id="countAll" resultType="java.lang.Integer">
+		select count(user_id) from tb_user;
+	</select>
+
+	<select id="pageUser" resultMap="userResultMap">
+		select user_id,username,userpass,email,phone,realname,gender,photo_path,status
+		from tb_user
+		order by user_id
+		limit #{offset},#{pageSize}
+	</select>
+
+	<select id="queryByPhone" parameterType="string" resultMap="userResultMap">
+		select user_id,username,userpass,email,phone,realname,gender,photo_path,status
+		from tb_user
+		where phone=#{phone}
+	</select>
+</mapper>

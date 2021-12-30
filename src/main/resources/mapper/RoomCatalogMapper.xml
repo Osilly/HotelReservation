@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 命名空间-对应相应的接口 -->
+<mapper namespace="com.lyx.hrms.mapper.RoomCatalogMapper">
+	
+	<!-- 配置实体类与数据库表的对应关系 -->
+	<resultMap id="roomCatalogResultMap" type="roomCatalog" >
+		<id property="id" column="room_catalog_id" />
+		<result property="catalog" column="catalog" />
+	</resultMap>
+	
+	<!-- 主键回显 -->
+	<insert id="save" parameterType="roomCatalog" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_room_catalog(catalog)
+		values(#{catalog})
+	</insert>
+
+	<delete id="delete">
+		delete from tb_room_catalog
+		where room_catalog_id=#{id}
+	</delete>
+
+	<select id="selectByCatalogName" resultMap="roomCatalogResultMap" parameterType="java.lang.StringBuilder">
+		select room_catalog_id,catalog
+		from tb_room_catalog
+		where catalog=#{catalog}
+	</select>
+
+	<select id="selectById" resultMap="roomCatalogResultMap">
+		select room_catalog_id,catalog
+		from tb_room_catalog
+		where room_catalog_id=#{id}
+	</select>
+
+	<select id="listAll" resultMap="roomCatalogResultMap">
+		select room_catalog_id,catalog
+		from tb_room_catalog
+	</select>
+</mapper>

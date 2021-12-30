@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 命名空间-对应相应的接口 -->
+<mapper namespace="com.lyx.hrms.mapper.PromotionMapper">
+	
+	<!-- 配置实体类与数据库表的对应关系 -->
+	<resultMap id="promotionResultMap" type="promotion" >
+		<id property="id" column="promotion_id" />
+		<result property="title" column="title" />
+		<result property="content" column="content" />
+		<result property="pubDate" column="pub_date" />
+	</resultMap>
+	
+	<!-- 主键回显 -->
+	<insert id="save" parameterType="promotion" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_promotion (title,content,pub_date)
+		values(#{title},#{content},#{pubDate})
+	</insert>
+
+	<delete id="delete">
+		delete from tb_promotion
+		where promotion_id=#{id}
+	</delete>
+
+	<update id="update" parameterType="roomCatalog">
+		update tb_promotion
+		<set>
+			<if test="title!=null">title=#{title},</if>
+			<if test="content!=null">content=#{content},</if>
+		</set>
+		where promotion_id=#{id}
+	</update>
+	
+	<select id="findById" resultMap="promotionResultMap" parameterType="int">
+		select promotion_id,title,content,pub_date
+		from tb_promotion
+		where promotion_id=#{id}
+	</select>
+
+	<select id="listAll" resultMap="promotionResultMap">
+		select promotion_id,title,content,pub_date
+		from tb_promotion
+		order by pub_date DESC
+	</select>
+</mapper>

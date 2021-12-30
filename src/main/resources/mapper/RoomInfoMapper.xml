@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 命名空间-对应相应的接口 -->
+<mapper namespace="com.lyx.hrms.mapper.RoomInfoMapper">
+	
+	<!-- 客房类型 外键映射 -->
+	<resultMap id="roomCatalogResultMap" type="roomCatalog" >
+		<id property="id" column="room_catalog_id" />
+		<result property="catalog" column="catalog" />
+	</resultMap>
+
+	<resultMap id="roomInfoResultMap" type="roomInfo">
+		<id property="id" column="room_info_id"/>
+		<result property="roomNum" column="room_num"/>
+		<result property="area" column="area"/>
+		<result property="primaryPhoto" column="photo_path"/>
+		<result property="intro" column="intro"/>
+		<result property="price" column="price"/>
+		<result property="roomStatus" column="status"/>
+		<result property="version" column="version"/>
+		<association property="roomCatalog" column="room_catalog_id" resultMap="roomCatalogResultMap"/>
+	</resultMap>
+
+	<!-- 主键回显 -->
+	<insert id="save" parameterType="roomInfo" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_room_info (room_num,area,photo_path,intro,price)
+		values(#{roomNum},#{area},#{primaryPhoto},#{intro},#{price})
+	</insert>
+
+	<delete id="deleteByRoomNum" parameterType="java.lang.String">
+		delete from tb_room_info
+		where room_num=#{roomNum} and status=0
+	</delete>
+
+	<update id="update" parameterType="roomInfo">
+		update tb_room_info
+		<set>
+			<if test="roomNum!=null">room_num=#{roomNum},</if>
+			<if test="area!=null">area=#{area},</if>
+			<if test="primaryPhoto!=null">photo_path=#{primaryPhoto},</if>
+			<if test="intro!=null">intro=#{intro},</if>
+			<if test="price!=null">price=#{price},</if>
+			<if test="roomCatalog!=null">room_catalog_id=#{roomCatalog.id},</if>
+			<if test="version!=null">version=version+1,</if>
+		</set>l
+		where room_info_id=#{id} and status=0 and version=#{version}
+	</update>
+
+	<update id="modifyStatus" parameterType="roomInfo">
+		update tb_room_info
+		set status=#{roomStatus}, version=version+1
+		where version=#{version} and room_Info_id=#{id};
+	</update>
+
+	<select id="selectByNum" resultMap="roomInfoResultMap" parameterType="java.lang.String">
+		select room_info_id,room_num,area,photo_path,intro,price,status,version,c.room_catalog_id,c.catalog
+		from tb_room_info as i
+		left outer join tb_room_catalog as c
+			on i.room_catalog_id=c.room_catalog_id
+		where room_num=#{num}
+	</select>
+
+	<select id="count" resultType="_int">
+		select count(room_info_id)
+		from tb_room_info
+	</select>
+
+	<select id="page" resultMap="roomInfoResultMap">
+		select room_info_id,room_num,area,photo_path,intro,price,status,version,room_catalog_id
+		from tb_room_info
+		order by room_num
+		limit #{offset},#{pageSize};
+	</select>
+
+	<select id="countByRoomCatalogId" resultType="_int">
+		select count(room_info_id)
+		from tb_room_info
+		where room_catalog_id=#{id}
+	</select>
+
+	<select id="pageByRoomCatalogId" resultMap="roomInfoResultMap">
+		select room_info_id,room_num,area,photo_path,intro,price,status,version,room_catalog_id
+		from tb_room_info
+		where room_catalog_id=#{roomCatalogId}
+		order by room_num
+		limit #{offset},#{pageSize};
+	</select>
+
+	<select id="getByVersion" resultMap="roomInfoResultMap">
+		select room_info_id,room_num,area,photo_path,intro,price,status,version,room_catalog_id
+		from tb_room_info
+		order by version desc
+		limit 0,6;
+	</select>
+</mapper>

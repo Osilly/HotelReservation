@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 命名空间-对应相应的接口 -->
+<mapper namespace="com.lyx.hrms.mapper.HistoryOrderMapper">
+
+	<resultMap id="reservationResultMap" type="reservation" >
+		<id property="id" column="reservation_id" />
+		<result property="reservationStatus" column="status"/>
+	</resultMap>
+
+	<resultMap id="adminResultMap" type="admin" >
+		<id property="id" column="admin_id" />
+		<result property="realName" column="realname"/>
+		<result property="empNum" column="empnum"/>
+	</resultMap>
+
+	<!-- 配置实体类与数据库表的对应关系 -->
+	<resultMap id="historyOrderResultMap" type="historyOrder" >
+		<id property="id" column="history_order_id" />
+		<id property="checkOutDate" column="checkOutDate" />
+		<association property="admin" column="admin_id" resultMap="adminResultMap"/>
+		<association property="reservation" column="reservation_id" resultMap="reservationResultMap"/>
+	</resultMap>
+	
+	<!-- 主键回显 -->
+	<insert id="save" parameterType="historyOrder" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_history_order (admin_id,reservation_id,checkOutDate)
+		values(#{admin.id},#{reservation.id},#{checkOutDate})
+	</insert>
+
+</mapper>
