@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 命名空间-对应相应的接口 -->
+<mapper namespace="com.lyx.hrms.mapper.ReservationMapper">
+
+	<resultMap id="userResultMap" type="user" >
+		<id property="id" column="user_id" />
+		<result property="username" column="username" />
+		<result property="realName" column="realname"/>
+	</resultMap>
+
+	<resultMap id="roomInfoResultMap" type="roomInfo">
+		<id property="id" column="room_info_id"/>
+		<result property="roomNum" column="room_num"/>
+		<result property="price" column="price"/>
+		<result property="version" column="version"/>
+	</resultMap>
+	
+	<!-- 配置实体类与数据库表的对应关系 -->
+	<resultMap id="reservationResultMap" type="reservation" >
+		<id property="id" column="reservation_id" />
+		<result property="reservationStatus" column="status"/>
+		<result property="orderTime" column="order_time" />
+		<result property="days" column="days" />
+		<result property="checkInTime" column="check_in_time" />
+		<result property="checkInName" column="check_in_name" />
+		<result property="checkInPhone" column="check_in_phone" />
+		<association property="user" column="user_id" resultMap="userResultMap"/>
+		<association property="roomInfo" column="room_info_id" resultMap="roomInfoResultMap"/>
+	</resultMap>
+	
+	<update id="save" parameterType="reservation">
+		insert into tb_reservation (status,order_time,days,check_in_time,check_in_name,check_in_phone,user_id,room_info_id)
+		values(#{reservationStatus},#{orderTime},#{days},#{checkInTime},#{checkInName},#{checkInPhone},#{user.id},#{roomInfo.id});
+	</update>
+
+	<update id="updateStatus" parameterType="reservation">
+		update tb_reservation set status=#{reservationStatus} where reservation_id=#{id};
+	</update>
+	
+	<select id="findById" resultMap="reservationResultMap" parameterType="int">
+		select reservation_id,r.status,order_time,days,check_in_time,check_in_name,check_in_phone,i.room_info_id,u.user_id,u.username,u.realname,
+			i.room_num,i.price,i.version
+		from tb_reservation as r
+		left outer join tb_user as u
+			on r.user_id=u.user_id
+	  	left outer join tb_room_info as i
+	  		on r.room_info_id=i.room_info_id
+		where reservation_id=#{id}
+	</select>
+
+	<select id="findByUserId" resultMap="reservationResultMap">
+		select reservation_id,r.status,order_time,days,check_in_time,check_in_name,check_in_phone,i.room_info_id,u.user_id,u.username,u.realname,
+			i.room_num,i.price,i.version
+		from tb_reservation as r
+		left outer join tb_user as u
+			on r.user_id=u.user_id
+	  	left outer join tb_room_info as i
+	  		on r.room_info_id=i.room_info_id
+		where u.user_id=#{id}
+		order by order_time desc
+	</select>
+
+	<select id="countReservation" resultType="java.lang.Integer">
+		select count(1) from tb_reservation;
+	</select>
+
+	<select id="selectListByOrderTime" resultMap="reservationResultMap">
+		select reservation_id,r.status,order_time,days,check_in_time,check_in_name,check_in_phone,i.room_info_id,u.user_id,u.username,u.realname,
+		i.room_num,i.price,i.version
+		from tb_reservation as r
+		left outer join tb_user as u
+		on r.user_id=u.user_id
+		left outer join tb_room_info as i
+		on r.room_info_id=i.room_info_id
+		order by order_time desc
+		limit #{offset},#{pageSize}
+	</select>
+
+	<select id="selectListByCheckInTime" resultMap="reservationResultMap">
+		select reservation_id,r.status,order_time,days,check_in_time,check_in_name,check_in_phone,i.room_info_id,u.user_id,u.username,u.realname,
+		i.room_num,i.price,i.version
+		from tb_reservation as r
+		left outer join tb_user as u
+		on r.user_id=u.user_id
+		left outer join tb_room_info as i
+		on r.room_info_id=i.room_info_id
+		order by check_in_time desc
+		limit #{offset},#{pageSize}
+	</select>
+</mapper>

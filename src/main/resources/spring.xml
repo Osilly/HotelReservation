@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mybatis="http://mybatis.org/schema/mybatis-spring"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://mybatis.org/schema/mybatis-spring
+        http://mybatis.org/schema/mybatis-spring.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd">
+    <!-- 配置扫描哪个包及其子包来发现需要纳入Spring IoC容器管理的对象 -->
+    <!-- Spring扫包（将打了@Repository，@Service注解的类纳入IoC容器进行管理） -->
+    <context:component-scan base-package="com.lyx.hrms">
+        <!-- 排除掉控制层 -->
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+        <context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice" />
+    </context:component-scan>
+    <context:annotation-config/>
+    <!-- 配置属性占位符的处理对象 该对象可以读取指定的配置文件获取参数 -->
+    <!-- 如果参数值是经过特殊处理的值 那么就需要继承该类自定义属性占位符处理对象 -->
+
+    <!-- 配置数据库连接池 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <!-- 基本属性 url、user、password -->
+        <property name="url" value="jdbc:mysql://localhost:3306/hotel?useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=true&amp;serverTimezone=UTC" />
+        <property name="username" value="root" />
+        <property name="password" value="123456" />
+        <!-- 配置初始化大小、最小、最大 -->
+        <property name="initialSize" value="1" />
+        <property name="minIdle" value="1" />
+        <property name="maxActive" value="20" />
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="3000" />
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="60000" />
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="300000" />
+        <property name="validationQuery" value="SELECT 'x'" />
+        <property name="testWhileIdle" value="true" />
+        <property name="testOnBorrow" value="false" />
+        <property name="testOnReturn" value="false" />
+        <!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+        <property name="poolPreparedStatements" value="true" />
+        <property name="maxPoolPreparedStatementPerConnectionSize" value="20" />
+        <!-- 配置监控统计拦截的filters -->
+<!--        <property name="filters" value="stat" />-->
+    </bean>
+    <!-- 配置mybatis的sqlSessionFactory -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!-- 配置类型别名 -->
+        <property name="typeAliasesPackage" value="com.lyx.hrms.domain"/>
+        <!-- 配置映射器xml文件 -->
+        <property name="mapperLocations" value="classpath*:mapper/*.xml"/>
+        <!-- 配置mybatis的类型转换器 -->
+        <property name="typeHandlersPackage" value="com.lyx.hrms.handler"/>
+    </bean>
+    <!-- 配置mybatis的映射器，将包下的接口自动生成实现类并纳入Ioc容器的管理 -->
+    <mybatis:scan base-package="com.lyx.hrms.mapper"/>
+    <!-- 配置事务管理 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!-- 配置声明式事务 -->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+    <!-- HttpClient连接池 -->
+    <bean id="poolingHttpClientConnectionManager"
+          class="org.apache.http.impl.conn.PoolingHttpClientConnectionManager">
+        <!-- 最大连接数 -->
+        <property name="maxTotal" value="20" />
+        <!-- 设置每个主机的并发数 -->
+        <property name="defaultMaxPerRoute" value="5" />
+    </bean>
+    <!-- HttpClient对象的构建器 -->
+    <bean id="httpClientBuilder" class="org.apache.http.impl.client.HttpClientBuilder">
+        <property name="connectionManager" ref="poolingHttpClientConnectionManager" />
+    </bean>
+    <!-- HttpClient对象 注意该对象需要设置scope="prototype":多例 -->
+    <bean class="org.apache.http.impl.client.CloseableHttpClient"
+          factory-bean="httpClientBuilder" factory-method="build" scope="prototype" />
+    <!-- 请求配置的构建器 -->
+    <bean id="requestConfigBuilder" class="org.apache.http.client.config.RequestConfig.Builder">
+        <!-- 创建连接的最长时间 -->
+        <property name="connectTimeout" value="1000" />
+        <!-- 从连接池中获取到连接的最长时间 -->
+        <property name="connectionRequestTimeout" value="500" />
+        <!-- 数据传输的最长时间 -->
+        <property name="socketTimeout" value="10000" />
+        <!-- 提交请求前测试连接是否可用 -->
+        <property name="staleConnectionCheckEnabled" value="true" />
+    </bean>
+    <!-- RequestConfig对象 -->
+    <bean class="org.apache.http.client.config.RequestConfig"
+          factory-bean="requestConfigBuilder" factory-method="build" />
+    <!-- 定期清理无效连接 -->
+    <bean class="com.lyx.hrms.util.IdleConnectionEvictor">
+        <constructor-arg index="0" ref="poolingHttpClientConnectionManager"/>
+    </bean>
+</beans>

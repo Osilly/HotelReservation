@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 命名空间-对应相应的接口 -->
+<mapper namespace="com.lyx.hrms.mapper.RoomPhotoMapper">
+
+	<resultMap id="roomInfoResultMap" type="roomInfo">
+		<id property="id" column="room_info_id"/>
+		<result property="roomNum" column="room_num"/>
+	</resultMap>
+	
+	<!-- 配置实体类与数据库表的对应关系 -->
+	<resultMap id="roomPhotoResultMap" type="roomPhoto" >
+		<id property="id" column="room_photo_id" />
+		<result property="photoPath" column="photo_path" />
+		<association property="roomInfo" column="room_info_id" resultMap="roomInfoResultMap"/>
+	</resultMap>
+	
+	<!-- 主键回显 -->
+	<insert id="save" parameterType="roomPhoto" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_room_photo(photo_path,room_info_id)
+		values(#{photoPath},#{roomInfo.id})
+	</insert>
+
+	<delete id="delete">
+		delete from tb_room_photo
+		where room_photo_id=#{id} and status=0
+	</delete>
+
+	<delete id="deleteByRoomId">
+		delete from tb_room_photo
+		where room_info_id=#{roomId}
+	</delete>
+
+	<select id="listByRoomInfoId" resultMap="roomPhotoResultMap" parameterType="int">
+		select p.room_photo_id,p.photo_path,i.room_info_id,i.room_num
+		from tb_room_info as i
+		left outer join tb_room_photo as p
+			on i.room_info_id=p.room_info_id
+		where p.room_info_id=#{id}
+	</select>
+</mapper>

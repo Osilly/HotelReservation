@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 命名空间-对应相应的接口 -->
+<mapper namespace="com.lyx.hrms.mapper.CommentMapper">
+
+	<resultMap id="roomInfoResultMap" type="roomInfo">
+		<id property="id" column="room_info_id"/>
+		<result property="roomNum" column="room_num"/>
+	</resultMap>
+
+	<resultMap id="userResultMap" type="user" >
+		<id property="id" column="user_id" />
+		<result property="username" column="username" />
+		<result property="photoPath" column="photo_path" />
+	</resultMap>
+
+	<!-- 配置实体类与数据库表的对应关系 -->
+	<resultMap id="commentResultMap" type="comment" >
+		<id property="id" column="comment_id" />
+		<result property="content" column="content" />
+		<result property="pubDate" column="pub_date" />
+		<association property="roomInfo" column="room_info_id" resultMap="roomInfoResultMap"/>
+		<association property="user" column="user_id" resultMap="userResultMap"/>
+	</resultMap>
+	
+	<!-- 主键回显 -->
+	<insert id="save" parameterType="roomCatalog" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_comment(content,pub_date,room_info_id,user_id)
+		values(#{content},#{pubDate},#{roomInfo.id},#{user.id})
+	</insert>
+
+	<delete id="delete">
+		delete from tb_comment
+		where comment_id = #{id}
+	</delete>
+
+	<select id="listByUserId" resultMap="commentResultMap" parameterType="int">
+		select c.comment_id, c.content, c.pub_date, r.room_info_id, r.room_num, u.user_id, u.username, u.photo_path
+		from tb_comment as c
+		left outer join tb_user as u on c.user_id=u.user_id
+		left outer join tb_room_info as r on c.room_info_id=r.room_info_id
+		where c.user_id=#{id}
+	</select>
+
+	<select id="listByRoomInfoId" resultMap="commentResultMap">
+		select c.comment_id,c.content,c.pub_date,r.room_info_id,r.room_num,u.user_id,u.username,u.photo_path
+		from tb_comment as c
+		left outer join tb_user as u on c.user_id=u.user_id
+		left outer join tb_room_info as r on c.room_info_id=r.room_info_id
+		where c.room_info_id=#{id}
+		order by c.pub_date DESC
+	</select>
+
+	<select id="countByRoomInfoId" resultType="_int">
+		select count(comment_id)
+		from tb_comment
+		where room_info_id=#{roomInfoId}
+	</select>
+
+	<select id="pageByRoomInfoId" resultMap="commentResultMap">
+		select c.comment_id,c.content,c.pub_date,r.room_info_id,r.room_num,u.user_id,u.username,u.photo_path
+		from tb_comment as c
+		left outer join tb_user as u on c.user_id=u.user_id
+		left outer join tb_room_info as r on c.room_info_id=r.room_info_id
+		where c.room_info_id=#{roomInfoId}
+		ORDER BY c.pub_date DESC
+		limit #{offset},#{pageSize}
+	</select>
+</mapper>

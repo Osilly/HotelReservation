@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 命名空间-对应相应的接口 -->
+<mapper namespace="com.lyx.hrms.mapper.AdminMapper">
+	
+	<!-- 配置实体类与数据库表的对应关系 -->
+	<resultMap id="adminResultMap" type="admin" >
+		<id property="id" column="admin_id" />
+		<result property="username" column="username" />
+		<result property="password" column="userpass"/>
+		<result property="realName" column="realname"/>
+		<result property="empNum" column="empnum"/>
+		<result property="superAdmin" column="super_admin"/>
+	</resultMap>
+	
+	<!-- 主键回显 -->
+	<insert id="save" parameterType="admin" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_admin (username,userpass,realname,empnum)
+		values(#{username},#{password},#{realName},#{empNum})
+	</insert>
+
+	<delete id="delete">
+		delete from tb_admin
+		where admin_id=#{id}
+	</delete>
+
+	<update id="update" parameterType="admin">
+		update tb_admin
+		<set>
+			<if test="password!=null">userpass=#{password},</if>
+		</set>
+		where admin_id=#{id}
+	</update>
+
+	<select id="findByEmpNum" resultMap="adminResultMap">
+		select admin_id,username,userpass,realname,empnum,super_admin
+		from tb_admin
+		where empnum=#{_parameter}
+	</select>
+
+	<select id="findById" resultMap="adminResultMap" parameterType="int">
+		select admin_id,username,userpass,realname,empnum,super_admin
+		from tb_admin
+		where admin_id=#{id}
+	</select>
+
+	<select id="findByUsername" resultMap="adminResultMap">
+		select admin_id,username,userpass,realname,empnum,super_admin
+		from tb_admin
+		where username=#{_parameter}
+	</select>
+
+	<select id="listAll" resultMap="adminResultMap">
+		select admin_id,username,userpass,realname,empnum,super_admin
+		from tb_admin
+		order by empnum;
+	</select>
+</mapper>
