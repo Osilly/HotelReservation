@@ -22,6 +22,7 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private UserMapper userMapper;
 

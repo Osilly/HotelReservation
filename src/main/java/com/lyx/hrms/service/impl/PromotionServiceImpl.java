@@ -14,6 +14,7 @@ import java.util.List;
 @Service
 public class PromotionServiceImpl implements PromotionService {
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private PromotionMapper promotionMapper;
 

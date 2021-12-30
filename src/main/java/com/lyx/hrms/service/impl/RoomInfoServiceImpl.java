@@ -23,12 +23,15 @@ import java.util.List;
 @Service
 public class RoomInfoServiceImpl implements RoomInfoService {
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private RoomInfoMapper roomMapper;
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private RoomPhotoMapper photoMapper;
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private RoomCatalogMapper catalogMapper;
 

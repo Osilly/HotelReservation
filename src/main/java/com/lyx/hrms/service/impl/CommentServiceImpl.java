@@ -17,6 +17,7 @@ import java.util.List;
 @Service
 public class CommentServiceImpl implements CommentService {
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private CommentMapper commentMapper;
 

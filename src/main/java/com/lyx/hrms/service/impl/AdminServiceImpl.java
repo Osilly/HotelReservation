@@ -21,6 +21,7 @@ import java.util.List;
 @Service
 public class AdminServiceImpl implements AdminService {
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private AdminMapper adminMapper;
 
